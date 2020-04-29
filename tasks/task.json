@@ -1,0 +1,28 @@
+{
+	"TASK_MODULES": ["1_task.py", "2_task.py"],
+	"TASK_MODULES_DIRECTORY": "",
+	"TASK_ARGS": "",
+	"TASK_OUTPUT_CONTAINER" : "outputcrap",
+	"JOB_MANIFEST" :
+					[
+						{
+							"TASK_MODULE" : "1_task.py",
+							"TASK_INPUT" : "java -Xmx4096m -jar blackscholes.jar 10.0 11.0 36.0 48.0 100"
+						},
+
+						{
+							"TASK_MODULE" : "1_task.py",
+							"TASK_INPUT" : "java -Xmx4096m -jar blackscholes.jar 10.0 11.0 24.0 36.0 100"
+						},
+
+						{
+							"TASK_MODULE" : "1_task.py",
+							"TASK_INPUT" : "java -Xmx4096m -jar blackscholes.jar 10.0 11.0 12.0 24.0 100"
+						},
+
+						{
+							"TASK_MODULE" : "1_task.py",
+							"TASK_INPUT" : "java -Xmx4096m -jar blackscholes.jar 10.0 11.0 0.0 12.0 100"
+						}
+					]
+}
