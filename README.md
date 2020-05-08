@@ -1,4 +1,4 @@
-# Azure Batch Wrapper
+# Azure Realtime Batch Wrapper
 This project aims to provide a framework to add dynamic and interactive scheduling to Azure Batch.  The goal for the project is to enable a Azure Batch to do interactive task execution.  
 This codebase is build atop to the exisitng Azure Batch wrapper to aide a developer to get up and running with Azure Batch with 10 or so lines of code.  
 
