@@ -1,5 +1,4 @@
 # Azure Batch Wrapper
-
 This project aims to provide a framework to add dynamic and interactive scheduling to Azure Batch.  The goal for the project is to enable a Azure Batch to do interactive task execution.  
 This codebase is build atop to the exisitng Azure Batch wrapper to aide a developer to get up and running with Azure Batch with 10 or so lines of code.  
 
@@ -11,7 +10,6 @@ This interaction can continue indefinitely.
 
 
 # Features:
-
 * Get up and running with a complex Azure Batch application in minutes.  
 * Create a pool, run tasks, run a workflow, all with just a few function calls. 
 * You dont need to create a new pool.  You can reuse the pool already created for the same job
@@ -39,8 +37,6 @@ This interaction can continue indefinitely.
 * Integrate with things like log analytics, storage, etc to move the logs, output, etc
 * Pool management - increase/decrease size
 * Error handling and retries for failed tasks
-* Move the hardcoded params to config files
-
 
 
 # How to use (these steps remain the same with the Azure Batch Wrapper)
@@ -188,10 +184,8 @@ You do not need to collect the results.  You can collect all the results at once
 This API now supports JAVA.   A jar file can be called from the one of the tasks files, and the output to be treated
 the same as python.  
 ```
-
     jar_args = ['pi.jar']  # Any number of args to be passed to the jar file
     result = engine.java_runner(*jar_args)
-
 ```
 
 The result comes back from the stdout and stderr to the calling program.  This api can be combined with the previous 
@@ -227,7 +221,6 @@ def do_action(engine, args):
 do_action is the method that represents the business logic, and that is the method that will get called.  The arguments (args) are past in from the client driver shown above.  
 
 ```
-
 def do_action(engine, args):
     print('Hello world from do_action #2')
 
