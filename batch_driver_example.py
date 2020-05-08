@@ -32,6 +32,7 @@ import time
 
 from batchwrapper.azbatchstorage import AzureBatchStorage
 from batchwrapper.azbatch import AzureBatch
+from driver.jobmanager import JobManager
 
 if __name__ == '__main__':
 
@@ -47,8 +48,8 @@ if __name__ == '__main__':
     storage.addInputFilePath("requirements.txt")
     storage.uploadInputFiles()
 
-    storage.addTaskFilePath("tasks/blackscholes.jar")
-    storage.addTaskFilePath("tasks/1_task.py")
+    #storage.addTaskFilePath("tasks/blackscholes.jar")
+    storage.addTaskFilePath("tasks/2_task.py")
     storage.uploadTaskFiles()
 
     my_batch = AzureBatch(storage)
@@ -56,7 +57,6 @@ if __name__ == '__main__':
     input_files = storage.getApplicationInputFiles()
     tasks = storage.getBatchTaskFiles()
 
-    #my_pool = "azpool_155836035085950"
 
 
     ## to create a pool
@@ -66,7 +66,7 @@ if __name__ == '__main__':
     #my_pool = my_batch.get_available_pool()
 
     ### use a very specific pool
-    my_pool = "azpool_158758067460598"
+    my_pool = "azpool_15889060782005"
 
     my_batch.repurpose_existing_pool(my_pool,app, input_files, tasks)
 
@@ -85,10 +85,35 @@ if __name__ == '__main__':
     job_id = my_batch.create_a_job()
 
 
-    #args = ('1_task.py' , 'b.txt')
-
-    #my_batch.add_task_to_job(job_id, 1 , args)
+    my_batch.start_engine(job_id)
 
 
-    my_batch.add_tasks_from_manifest_file(job_id, "task.json")
+    job_manager = JobManager("client_1", job_id)
+
+    total = 3
+
+    for i in range(total):
+        job_manager.submit_task(str(i),'2_task.py', 'this is an input param list')
+
+    result = 0
+    while result < 3:
+        result = job_manager.num_results_returned()
+        time.sleep(1)
+
+    print(job_manager.get_results())
+
+    total = 4
+
+    for i in range(total):
+        job_manager.submit_task(str(i),'2_task.py', 'this is an input param list')
+
+    result = 0
+    while result < 4:
+        result = job_manager.num_results_returned()
+        time.sleep(1)
+
+    job_manager.close_job()
+
+
+
 

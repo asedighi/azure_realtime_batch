@@ -23,11 +23,8 @@
 # DEALINGS IN THE SOFTWARE.
 #
 # @author: asedighi
-
-
-
+import asyncio
 import sys
-
 
 sys.path.append('.')
 sys.path.append('..')
@@ -43,9 +40,12 @@ from batchwrapper.config import TaskConfig
 from batchwrapper.config import find_file_path
 import argparse
 import ntpath
-from engine.taskfinder import task_importer
+from engine.taskengine import task_loop
 from subprocess import *
 from azure.storage.blob import BlobServiceClient
+from azure.servicebus import ServiceBusClient
+
+
 
 import os
 
@@ -57,14 +57,11 @@ class AzureBatchEngine():
 
         configuration = AzureCredentials()
 
-        #self.account_name = configuration.getStorageAccountName()
-        #self.account_key = configuration.getStorageAccountKey()
-        ##self.blob_client = azureblob.BlockBlobService(account_name=self.account_name, account_key=self.account_key)
-
         self.storage_string = configuration.getStorageConnectionString()
+        self.servicebus_string = configuration.get_service_bus_connection_string()
 
         self.blob_service_client = BlobServiceClient.from_connection_string(self.storage_string)
-
+        self.service_bus_client = ServiceBusClient.from_connection_string(self.servicebus_string)
 
         task = TaskConfig()
 
@@ -124,19 +121,18 @@ class AzureBatchEngine():
         return ret
 
 
-    def do(self, args = []):
+    def do(self):
 
         #in_data = ' '.join(args[1:])
-        in_data = args[1:]
+        #in_data = args[1:]
 
 
         #print("setting arguments to: ", in_data)
 
-        task_command = (args[0], in_data)
 
-        #print("task command is: ", task_command)
+        #task_command = (args[0], in_data)
 
-        task_importer(self, "../tasks", task_command)
+        task_loop(self, "../tasks")
 
         #self.uploadResultData()
         self.uploadFiles()
@@ -195,7 +191,7 @@ class AzureBatchEngine():
 if __name__ == '__main__':
 
 
-    print("Received input: {}".format(sys.argv[1:]))
+    print("Starting engine ...")
 
     #all_input = sys.argv[1:];
 
@@ -207,6 +203,6 @@ if __name__ == '__main__':
     #exit(1)
 
     engine = AzureBatchEngine()
-    engine.do(sys.argv[1:])
+    engine.do()
 
 

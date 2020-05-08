@@ -28,11 +28,11 @@ import os
 from engine.azbatchengine import AzureBatchEngine
 
 
-def do_action(engine, args = []):
+def do_action(engine, args):
     print('Hello world from do_action #2')
 
     for i in args:
         print("i need to do something to: {}".format(i))
 
 
-    return ["this is test 2"]
+    return 'this is a list of results', 'no error'

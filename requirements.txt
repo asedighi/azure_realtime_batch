@@ -1,3 +1,4 @@
 azure-storage-blob==12.3.0
 azure-batch==9.0.0
+azure-servicebus==0.50.0
 

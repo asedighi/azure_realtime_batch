@@ -83,7 +83,7 @@ class AzureBatch():
         print("Found task.json in: {}".format(task_json))
 
         self.my_storage.addApplicationFilePath("engine/"+batch_config.getEngineName())
-        self.my_storage.addApplicationFilePath("engine/taskfinder.py")
+        self.my_storage.addApplicationFilePath("engine/taskengine.py")
 
         #self.my_storage.addApplicationFilePath("batchwrapper/batch.json")
         self.my_storage.addApplicationFilePath(batch_json)
@@ -188,7 +188,7 @@ class AzureBatch():
             'mkdir -p $AZ_BATCH_NODE_SHARED_DIR/tasks',
             'chmod 777 $AZ_BATCH_NODE_SHARED_DIR/tasks',
             'cp -p {} $AZ_BATCH_NODE_SHARED_DIR/engine/'.format(self.pool_engine_name),
-            'cp -p {} $AZ_BATCH_NODE_SHARED_DIR/engine/'.format("taskfinder.py"),
+            'cp -p {} $AZ_BATCH_NODE_SHARED_DIR/engine/'.format("taskengine.py"),
             'cp -p {} $AZ_BATCH_NODE_SHARED_DIR/batchwrapper/'.format("credentials.json"),
             'cp -p {} $AZ_BATCH_NODE_SHARED_DIR/batchwrapper/'.format("batch.json"),
             'cp -p {} $AZ_BATCH_NODE_SHARED_DIR/tasks'.format("task.json"),
@@ -266,7 +266,7 @@ class AzureBatch():
             'mkdir -p $AZ_BATCH_NODE_SHARED_DIR/tasks',
             'chmod 777 $AZ_BATCH_NODE_SHARED_DIR/tasks',
             'cp -p {} $AZ_BATCH_NODE_SHARED_DIR/engine/'.format(self.pool_engine_name),
-            'cp -p {} $AZ_BATCH_NODE_SHARED_DIR/engine/'.format("taskfinder.py"),
+            'cp -p {} $AZ_BATCH_NODE_SHARED_DIR/engine/'.format("taskengine.py"),
             'cp -p {} $AZ_BATCH_NODE_SHARED_DIR/batchwrapper/'.format("credentials.json"),
             'cp -p {} $AZ_BATCH_NODE_SHARED_DIR/batchwrapper/'.format("batch.json"),
             'cp -p {} $AZ_BATCH_NODE_SHARED_DIR/tasks'.format("task.json"),
@@ -294,8 +294,7 @@ class AzureBatch():
             task_commands.extend( ['/bin/bash -c "sudo yum -y install java-11-openjdk python3"', 'sudo pip3 install -r '+ requirements_file])
             ###task_commands.extend( ['curl -fSsL https://bootstrap.pypa.io/3.4/get-pip.py | python3', 'pip3 install -r '+ requirements_file])
         else:
-            task_commands.extend( ['/bin/bash -c "sudo yum -y install java-11-openjdk python3"', 'sudo pip3 install azure-storage-blob azure-batch'])
-
+            task_commands.extend( ['/bin/bash -c "sudo yum -y install java-11-openjdk python3"', 'sudo pip3 install -Iv azure-storage-blob==12.3.0 azure-batch==9.0.0 azure-servicebus==0.50.0'])
 
 
         print("commands to be published: {}".format(task_commands))
@@ -353,12 +352,14 @@ class AzureBatch():
 
         job = batch.models.JobAddParameter(
             id=job_id,
+            on_all_tasks_complete='terminateJob',
+            on_task_failure='performExitOptionsJobAction',
             pool_info=batch.models.PoolInformation(pool_id=self.pool_name))
 
         try:
             self.batch_client.job.add(job)
-        except batchmodels.batch_error.BatchErrorException as err:
-            print_batch_exception(err)
+        except Exception as err:
+            print(err)
             raise
 
         return job_id
@@ -387,8 +388,6 @@ class AzureBatch():
                 #resource_files=[i.file_path]
                 )
         )
-        self.batch_client.task.api_version = "2020-03-01.11.0"
-
         self.batch_client.task.add_collection(job_id, tasks)
 
 
@@ -403,6 +402,24 @@ class AzureBatch():
 
         for task_id, task_params in enumerate(tasks):
             self.add_task_to_job(job_id, task_id, task_params)
+
+    def start_engine(self, job_id):
+        task_id = 'engine_start'
+
+        print('Starting engine...')
+
+        command = ['python3 $AZ_BATCH_NODE_SHARED_DIR/engine/{}'.format(self.pool_engine_name)]
+
+        tasks = []
+
+        print("Command to be executed is: {}".format(command))
+        tasks.append(batch.models.TaskAddParameter(
+                id=task_id,
+                command_line=common.helpers.wrap_commands_in_shell('linux', command),
+                #resource_files=[i.file_path]
+                )
+        )
+        self.batch_client.task.add_collection(job_id, tasks)
 
 
 def print_batch_exception(batch_exception):

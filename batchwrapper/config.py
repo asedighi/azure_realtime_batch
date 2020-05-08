@@ -104,6 +104,7 @@ class AzureCredentials():
         self.batch_account_key = self.cred['BATCH_ACCOUNT_KEY']
         self.batch_account_url = self.cred['BATCH_ACCOUNT_URL']
         self.storage_connection_string = self.cred['STORAGE_CONNECTION_STRING']
+        self.service_bus_connection_string = self.cred['SERVICEBUS_CONNECTION_STRING']
 
 
         self.LOCATION = DEFAULT_LOCATION
@@ -130,7 +131,8 @@ class AzureCredentials():
         return self.storage_connection_string
 
 
-
+    def get_service_bus_connection_string(self):
+        return self.service_bus_connection_string
 '''
 {
 	"BATCH_NODE_COUNT": 2,

@@ -26,7 +26,7 @@
 
 import os
 from engine.azbatchengine import AzureBatchEngine
-
+import logging
 
 
 def do_action(engine, args):
@@ -43,20 +43,6 @@ def do_action(engine, args):
 
     print("got results: ", result)
 
-
-    all = ''
-
-    for i in result:
-        all = all + i
-        all = all + '\n'
-
-
-    engine.dataToUpload(all)
-    ##engine.uploadFiles()
-
-
-
-
-    #engine.addFileToUpload("a.txt")
+    return result, "no error"
 
 

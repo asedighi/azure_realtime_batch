@@ -66,7 +66,6 @@ def select_latest_verified_vm_image_with_node_agent_sku(
         batch_client, publisher, offer, sku_starts_with):
     """Select the latest verified image that Azure Batch supports given
     a publisher, offer and sku (starts with filter).
-
     :param batch_client: The batch client to use.
     :type batch_client: `batchserviceclient.BatchServiceClient`
     :param str publisher: vm image publisher
@@ -76,21 +75,22 @@ def select_latest_verified_vm_image_with_node_agent_sku(
     :return: (node agent sku id to use, vm image ref to use)
     """
     # get verified vm image list and node agent sku ids from service
-    node_agent_skus = batch_client.account.list_node_agent_skus()
+    options = batchmodels.AccountListSupportedImagesOptions(
+        filter="verificationType eq 'verified'")
+    images = batch_client.account.list_supported_images(
+        account_list_supported_images_options=options)
 
-    ###print(node_agent_skus)
     # pick the latest supported sku
     skus_to_use = [
-        (sku, image_ref) for sku in node_agent_skus for image_ref in sorted(
-            sku.verified_image_references, key=lambda item: item.sku)
-        if image_ref.publisher.lower() == publisher.lower() and
-        image_ref.offer.lower() == offer.lower() and
-        image_ref.sku.startswith(sku_starts_with)
+        (image.node_agent_sku_id, image.image_reference) for image in images
+        if image.image_reference.publisher.lower() == publisher.lower() and
+        image.image_reference.offer.lower() == offer.lower() and
+        image.image_reference.sku.startswith(sku_starts_with)
     ]
-    # skus are listed in reverse order, pick first for latest
-    sku_to_use, image_ref_to_use = skus_to_use[0]
-    return (sku_to_use.id, image_ref_to_use)
 
+    # pick first
+    agent_sku_id, image_ref_to_use = skus_to_use[0]
+    return (agent_sku_id, image_ref_to_use)
 
 def wait_for_tasks_to_complete(batch_client, job_id, timeout):
     """Waits for all the tasks in a particular job to complete.
