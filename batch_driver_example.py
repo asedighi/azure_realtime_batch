@@ -57,6 +57,7 @@ if __name__ == '__main__':
     input_files = storage.getApplicationInputFiles()
     tasks = storage.getBatchTaskFiles()
 
+    my_batch.delete_all_jobs()
 
 
     ## to create a pool

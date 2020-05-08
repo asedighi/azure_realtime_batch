@@ -343,6 +343,15 @@ class AzureBatch():
 
         return self.pool_name
 
+    def delete_all_jobs(self):
+        all_jobs = self.batch_client.job.list()
+        for j_name in all_jobs:
+            self.delete_a_job(j_name.id)
+
+
+    def delete_a_job(self, id:str):
+        self.batch_client.job.delete(id)
+
 
     def create_a_job(self):
 

@@ -24,9 +24,9 @@ This interaction can continue indefinitely.
 * Error Handling (TODO)
 * Configure the pool, type, etc directly by using simple config files. etc.
 * Update/overwrite of config files is possible
+* Better job clean up.  You can delete all jobs or a single job
 
 # Known bugs:
-* Better job clean up.  Currently, this framework does not a good job at cleaning up after itself
 *
   
 # Still on the todo list:
