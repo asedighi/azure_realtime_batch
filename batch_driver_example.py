@@ -61,20 +61,20 @@ if __name__ == '__main__':
 
 
     ## to create a pool
-    #my_pool = my_batch.create_pool(app_resources=app, app_name='mcs', input_resources=input_files, task_files=tasks)
+    my_pool = my_batch.create_pool(app_resources=app, app_name='mcs', input_resources=input_files, task_files=tasks)
+
 
     ### to use any old pool available
     #my_pool = my_batch.get_available_pool()
 
     ### use a very specific pool
-    my_pool = "azpool_15889060782005"
+    ##my_pool = "azpool_15889060782005"
+    ##my_batch.repurpose_existing_pool(my_pool,app, input_files, tasks)
 
-    my_batch.repurpose_existing_pool(my_pool,app, input_files, tasks)
+    ### Use a specific pool without changing any configuration
+    ###my_batch.use_exisiting_pool(my_pool)
 
-    #my_batch.use_exisiting_pool(my_pool)
-
-
-    ## to delete a pool
+    ## to delete all pools
     #my_batch.delete_all_pools()
 
 

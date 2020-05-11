@@ -135,6 +135,35 @@ class AzureBatch():
         for n in pool_list:
             self.delete_pool(n)
 
+
+
+    def _wait_for_ready_pool(self, pool):
+
+        # because we want all nodes to be available before any tasks are assigned
+        # to the pool, here we will wait for all compute nodes to reach idle
+
+        pool_o = None
+        pool_paged = self.batch_client.pool.list()
+        for pool_s in pool_paged:
+            if pool_s.id == pool:
+                pool_o = pool_s
+                break;
+
+        nodes = common.helpers.wait_for_all_nodes_state(
+            self.batch_client, pool_o,
+            frozenset(
+                (batchmodels.ComputeNodeState.start_task_failed,
+                 batchmodels.ComputeNodeState.unusable,
+                 batchmodels.ComputeNodeState.idle)
+            )
+        )
+        # ensure all node are idle
+        if any(node.state != batchmodels.ComputeNodeState.idle for node in nodes):
+            raise RuntimeError('node(s) of pool {} not in idle state'.format(
+                pool))
+
+
+
     def get_available_pool(self):
 
         pool_list = []
@@ -148,6 +177,8 @@ class AzureBatch():
     def repurpose_existing_pool(self, pool='', app_resources='', input_resources='', tasks_files=''):
 
         self.use_exisiting_pool(pool)
+
+        self.pool_name = pool
 
         if app_resources == '':
             print(
@@ -174,8 +205,10 @@ class AzureBatch():
 
         self.batch_client.task.add_collection(job_id, tasks)
 
-        print("Going to asleep after delete - for 60 seconds")
-        time.sleep(60)
+        print("Waiting for pool to become ready...")
+
+        self._wait_for_ready_pool(self.pool_name)
+        ###time.sleep(60)
         print("Back up - going to repurpose the system now")
 
         #we need to create a new job now
@@ -239,8 +272,11 @@ class AzureBatch():
                                         command_line=common.helpers.wrap_commands_in_shell('linux', command),
                                        resource_files=resource_meta,user_identity=batchmodels.UserIdentity(auto_user=user)))
 
-        print("Going to asleep after repurpose - for 30 seconds")
-        time.sleep(30)
+
+        print("Waiting for pool to become ready after repurpose")
+
+        self._wait_for_ready_pool(self.pool_name)
+
         print("Back up - read to work now")
 
         return self.pool_name
@@ -334,12 +370,14 @@ class AzureBatch():
         try:
             self.batch_client.pool.add(new_pool)
         except batchmodels.batch_error.BatchErrorException as err:
-            print_batch_exception(err)
+            print(err)
             raise
 
-        print("Going to asleep after creation - for 30 seconds")
-        time.sleep(30)
-        print("Back up - read to work now")
+        print("Waiting for pool to become ready after creation")
+
+        self._wait_for_ready_pool(self.pool_name)
+
+        print("Back up - ready to work now")
 
         return self.pool_name
 
