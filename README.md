@@ -8,6 +8,8 @@ The engine takes tasks from a task queue hosted on Azure Service Bus.  The tasks
 Once the tasks are completed, the results are sent back the client it came from using Azure Service bus.  
 This interaction can continue indefinitely.  
 
+![Azure Realtime Batch](../master/Azure\ Batch\ Realtime.jpg)
+
 
 # Features:
 * Get up and running with a complex Azure Batch application in minutes.  
