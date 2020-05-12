@@ -381,9 +381,7 @@ class AzureBatch():
             raise
 
         print("Waiting for pool to become ready after creation")
-
         self._wait_for_ready_pool(self.pool_name)
-
         print("Back up - ready to work now")
 
         return self.pool_name

@@ -29,7 +29,8 @@ This interaction can continue indefinitely.
 * Better job clean up.  You can delete all jobs or a single job
 
 # Known bugs:
-*
+* Need to get ```` job_manager.close_job() ```` function to work.  Currently, it is unable to kill the listener thread.  
+
   
 # Still on the todo list:
 * Method names need to be changed to comply with Python.  They are "java-style" names
@@ -233,3 +234,71 @@ def do_action(engine, args):
     return 'this is a list of results', 'no error'
 ```
 
+# Pi Monte Carlo example
+Because this hasnt been done a million times!
+
+See pi_my.py for the driver application.  We start with uploading the application files to the backend.
+
+````python
+
+    storage.addTaskFilePath("tasks/pi_runner.py")
+    storage.addTaskFilePath("tasks/pi.jar")
+    storage.uploadTaskFiles()
+````  
+
+For our purposes, both of these files are included in this repo.   
+
+We need to either create a pool or use an exisitng pool.
+````python
+    my_pool = "azpool_15892490026565"
+    my_batch.repurpose_existing_pool(my_pool,app, input_files, tasks)
+
+````
+We need to start the engine on the backend and create a job manager object
+
+````python
+    job_id = my_batch.create_a_job()
+    my_batch.start_engine(job_id)
+    job_manager = JobManager("client_1", job_id)
+
+````
+The name 'client_1' is tells the service bus where the results are going to be published to, and therefor what topic to listen to.
+Now we need to submit tasks:
+
+```python
+    total = 1000
+    for i in range(total):
+        job_manager.submit_task(str(i),TASK_MODULE, TASK_INPUT)
+
+```
+I am submitting a 1000 tasks to the backend.  Each with the following format:
+````python
+    TASK_MODULE = "pi_runner.py"
+    TASK_INPUT = "java -Xmx4096m -jar pi.jar 100"
+````
+
+The task module is my java wrapper on the backend, and the rest are how to kickstart a java file.  
+Pi.jar takes one input, and that is an integer that tells it the number of monte Carlo iterations it needs to run (100 in our case).  
+
+so we are running 1000*100 paths!  Potentially all in parallel.  In this case, the cluster I created is only two nodes, so it took a while! 
+
+Here is the sample input and output to the cluster:
+
+````json
+Sent: {"id": "client_1", "jobid": "15892509695915", "taskid": "920", "command": "pi_runner.py", "params": "java -Xmx4096m -jar pi.jar 100"}
+
+Recieved result: {"result": ["3.2"], "id": "7f1636e502064ad1af7f30ad9597863e000001", "jobid": "15892509695915", "taskid": "853", "error": "no error"}
+````
+
+So there are 1000 of these for this run.  The id is the hostname of the batchnode.  If there is an issue, the error will be set, and you can go back to the batch node to see what happened.  
+
+
+pi_runner.py is very simple.  All the logic is in pi.jar, so pi_runner.py is just a  wrapper:
+
+```python
+def do_action(engine, args):
+    print('This is a pyrunner example - b/c this hasnt been done a million times!')
+    result = engine.java_runner(args)
+    return result, "no error"
+``` 
+You can do your own error handling, but the engine handles system-level errors and sends them back.  (eg. file not found errors)

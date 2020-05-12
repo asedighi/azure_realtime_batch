@@ -65,7 +65,7 @@ if __name__ == '__main__':
 
 
     ## to create a pool
-    #my_batch.delete_all_pools()
+    my_batch.delete_all_pools()
     #my_pool = my_batch.create_pool(app_resources=app, app_name='mcs', input_resources=input_files, task_files=tasks)
 
     ### to use any old pool available
