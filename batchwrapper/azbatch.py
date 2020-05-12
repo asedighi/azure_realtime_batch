@@ -359,6 +359,8 @@ class AzureBatch():
                 node_agent_sku_id=sku_to_use),
             vm_size=self.pool_type,
             target_dedicated_nodes=self.pool_count,
+            max_tasks_per_node=1,
+            task_scheduling_policy=batch.models.TaskSchedulingPolicy(node_fill_type=batch.models.ComputeNodeFillType.spread),
             start_task=batch.models.StartTask(
                 command_line=common.helpers.wrap_commands_in_shell('linux',
                                                                    task_commands),
@@ -426,15 +428,17 @@ class AzureBatch():
 
         command = ['python3 $AZ_BATCH_NODE_SHARED_DIR/engine/{} {}'.format(self.pool_engine_name, task_command)]
 
+
         tasks = []
 
         print("Command to be executed is: {}".format(command))
-        tasks.append(batch.models.TaskAddParameter(
-                id='{}_{}'.format(str(job_id), str(task_id)),
-                command_line=common.helpers.wrap_commands_in_shell('linux', command),
-                #resource_files=[i.file_path]
-                )
-        )
+
+        for i in range(self.pool_count):
+            tasks.append(batch.models.TaskAddParameter(
+                    id='{}_{}'.format(str(job_id), str(task_id)),
+                    command_line=common.helpers.wrap_commands_in_shell('linux', command),
+                    )
+            )
         self.batch_client.task.add_collection(job_id, tasks)
 
 
@@ -457,32 +461,16 @@ class AzureBatch():
 
         command = ['python3 $AZ_BATCH_NODE_SHARED_DIR/engine/{}'.format(self.pool_engine_name)]
 
-        tasks = []
 
         print("Command to be executed is: {}".format(command))
-        tasks.append(batch.models.TaskAddParameter(
-                id=task_id,
-                command_line=common.helpers.wrap_commands_in_shell('linux', command),
-                #resource_files=[i.file_path]
-                )
-        )
+
+        tasks = []
+
+        for i in range(self.pool_count):
+            tasks.append(batch.models.TaskAddParameter(
+                    id='{}_{}'.format(str(task_id), str(i)),
+                    command_line=common.helpers.wrap_commands_in_shell('linux', command),
+                    )
+            )
         self.batch_client.task.add_collection(job_id, tasks)
 
-
-def print_batch_exception(batch_exception):
-    """
-    Prints the contents of the specified Batch exception.
-
-    :param batch_exception:
-    """
-    print('-------------------------------------------')
-    print('Exception encountered:')
-    if batch_exception.error and \
-            batch_exception.error.message and \
-            batch_exception.error.message.value:
-        print(batch_exception.error.message.value)
-        if batch_exception.error.values:
-            print()
-            for mesg in batch_exception.error.values:
-                print('{}:\t{}'.format(mesg.key, mesg.value))
-    print('-------------------------------------------')

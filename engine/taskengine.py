@@ -81,11 +81,11 @@ def task_loop(engine, task_dir: str):
                         print("Unable to locate module: " + i)
                         return (None, None)
 
-                input_data, error = mod.do_action(engine, input_data)
+                out_data, error = mod.do_action(engine, input_data.split(' '))
 
 
                 data = {}
-                data['result'] = input_data
+                data['result'] = out_data
                 data['id'] = socket.gethostname()
                 data['jobid'] = jobid
                 data['taskid'] = taskid
