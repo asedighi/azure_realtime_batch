@@ -29,6 +29,8 @@ import datetime
 import os
 import sys
 import time
+import json
+
 
 from batchwrapper.azbatchstorage import AzureBatchStorage
 from batchwrapper.azbatch import AzureBatch
@@ -70,7 +72,7 @@ if __name__ == '__main__':
     #my_pool = my_batch.get_available_pool()
 
     ### use a very specific pool
-    my_pool = "azpool_15892385820954"
+    my_pool = "azpool_15892490026565"
     my_batch.repurpose_existing_pool(my_pool,app, input_files, tasks)
 
     ### Use a specific pool without changing any configuration
@@ -96,17 +98,29 @@ if __name__ == '__main__':
 
     job_manager = JobManager("client_1", job_id)
 
-    total = 10
+    total = 1000
 
     for i in range(total):
         job_manager.submit_task(str(i),TASK_MODULE, TASK_INPUT)
 
     result = 0
-    while result < 10:
+    while result < total:
         result = job_manager.num_results_returned()
         time.sleep(1)
 
-    print(job_manager.get_results())
+    results = job_manager.get_results()
+
+    sumtotal = 0
+    for i in results:
+        #print(i)
+        #json_data = json.loads(i)
+        r = i["result"]
+        sumtotal += float(r[0])
+
+
+    pi = float(sumtotal/total)
+    print("Pi value is: {}".format(pi))
+
 
     job_manager.close_job()
 

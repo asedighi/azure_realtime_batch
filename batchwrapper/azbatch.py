@@ -195,20 +195,20 @@ class AzureBatch():
         command = ['rm -rf $AZ_BATCH_NODE_SHARED_DIR/*']
 
         print("Command to be executed is: {}".format(command))
-        tasks.append(batch.models.TaskAddParameter(
-            id='{}_{}'.format(str(job_id), "clean"),
-            command_line=common.helpers.wrap_commands_in_shell('linux', command), user_identity=batchmodels.UserIdentity(auto_user=user))
-        )
 
-        #self.batch_client.task.api_version = "2020-03-01.11.0"
-
+        for i in range(self.pool_count):
+            tasks.append(batch.models.TaskAddParameter(
+                    id='{}_{}_{}'.format(str(job_id), "clean", str(i)),
+                    command_line=common.helpers.wrap_commands_in_shell('linux', command),
+                    )
+            )
 
         self.batch_client.task.add_collection(job_id, tasks)
 
         print("Waiting for pool to become ready...")
 
         self._wait_for_ready_pool(self.pool_name)
-        ###time.sleep(60)
+        #time.sleep(30)
         print("Back up - going to repurpose the system now")
 
         #we need to create a new job now
@@ -249,11 +249,6 @@ class AzureBatch():
         resource_meta.extend(tasks_files)
         resource_meta.extend(input_resources)
 
-
-        #for i in resource_meta:
-        #    print(i)
-
-
         user = batchmodels.AutoUserSpecification(scope=batchmodels.AutoUserScope.pool, elevation_level=batchmodels.ElevationLevel.admin)
 
 
@@ -266,12 +261,22 @@ class AzureBatch():
         #self.batch_client.task.api_version = "2020-03-01.11.0"
 
         #self.batch_client.task.add_collection(job_id=job_id, value=tasks)
-        self.batch_client.task.add(job_id=job_id,
-                                   task=batch.models.TaskAddParameter(
-                                        id='{}_{}'.format(str(job_id), "repurpose"),
-                                        command_line=common.helpers.wrap_commands_in_shell('linux', command),
-                                       resource_files=resource_meta,user_identity=batchmodels.UserIdentity(auto_user=user)))
+        #self.batch_client.task.add(job_id=job_id,
+        #                           task=batch.models.TaskAddParameter(
+        #                                id='{}_{}'.format(str(job_id), "repurpose"),
+        #                                command_line=common.helpers.wrap_commands_in_shell('linux', command),
+        #                               resource_files=resource_meta,user_identity=batchmodels.UserIdentity(auto_user=user)))
 
+        tasks = list()
+        for i in range(self.pool_count):
+            tasks.append(batch.models.TaskAddParameter(
+                    id='{}_{}_{}'.format(str(job_id), "repurpose", str(i)),
+                    command_line=common.helpers.wrap_commands_in_shell('linux', command),
+                    resource_files=resource_meta,user_identity=batchmodels.UserIdentity(auto_user=user))
+            )
+
+
+        self.batch_client.task.add_collection(job_id, tasks)
 
         print("Waiting for pool to become ready after repurpose")
 
