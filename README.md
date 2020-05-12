@@ -289,9 +289,18 @@ Sent: {"id": "client_1", "jobid": "15892509695915", "taskid": "920", "command": 
 
 Recieved result: {"result": ["3.2"], "id": "7f1636e502064ad1af7f30ad9597863e000001", "jobid": "15892509695915", "taskid": "853", "error": "no error"}
 ````
+I ran this a number of times with different number of tasks:
+```text
+# tasks	    value of pi
+10	        3.192
+20	        3.13
+40	        3.137
+100	        3.1428
+1000	        3.13403999999999
+```
+(the fact that the value of pi goes wrong has something to do with random number generation, and not this framework)
 
 So there are 1000 of these for this run.  The id is the hostname of the batchnode.  If there is an issue, the error will be set, and you can go back to the batch node to see what happened.  
-
 
 pi_runner.py is very simple.  All the logic is in pi.jar, so pi_runner.py is just a  wrapper:
 
