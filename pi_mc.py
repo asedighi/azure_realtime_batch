@@ -121,8 +121,10 @@ if __name__ == '__main__':
     pi = float(sumtotal/total)
     print("Pi value is: {}".format(pi))
 
+    my_batch.delete_a_job(job_id)
 
-    job_manager.close_job()
+
+    #job_manager.close_job()
 
 
 

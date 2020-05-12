@@ -282,7 +282,7 @@ class AzureBatch():
 
         self._wait_for_ready_pool(self.pool_name)
 
-        print("Back up - read to work now")
+        print("Back up - ready to work now")
 
         return self.pool_name
 
