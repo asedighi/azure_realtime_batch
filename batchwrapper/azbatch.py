@@ -200,7 +200,8 @@ class AzureBatch():
             tasks.append(batch.models.TaskAddParameter(
                     id='{}_{}_{}'.format(str(job_id), "clean", str(i)),
                     command_line=common.helpers.wrap_commands_in_shell('linux', command),
-                    )
+                    user_identity=batchmodels.UserIdentity(auto_user=user))
+
             )
 
         self.batch_client.task.add_collection(job_id, tasks)
@@ -208,7 +209,7 @@ class AzureBatch():
         print("Waiting for pool to become ready...")
 
         self._wait_for_ready_pool(self.pool_name)
-        #time.sleep(30)
+        time.sleep(self.pool_count * 1.5)
         print("Back up - going to repurpose the system now")
 
         #we need to create a new job now
@@ -281,6 +282,7 @@ class AzureBatch():
         print("Waiting for pool to become ready after repurpose")
 
         self._wait_for_ready_pool(self.pool_name)
+        time.sleep(self.pool_count * 1.5)
 
         print("Back up - ready to work now")
 
@@ -382,6 +384,7 @@ class AzureBatch():
 
         print("Waiting for pool to become ready after creation")
         self._wait_for_ready_pool(self.pool_name)
+        time.sleep(self.pool_count * 1.5)
         print("Back up - ready to work now")
 
         return self.pool_name

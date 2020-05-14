@@ -65,14 +65,15 @@ if __name__ == '__main__':
 
 
     ## to create a pool
-    my_batch.delete_all_pools()
-    #my_pool = my_batch.create_pool(app_resources=app, app_name='mcs', input_resources=input_files, task_files=tasks)
+    ##my_batch.delete_all_pools()
+    ##my_pool = my_batch.create_pool(app_resources=app, app_name='mcs', input_resources=input_files, task_files=tasks)
 
     ### to use any old pool available
     #my_pool = my_batch.get_available_pool()
 
     ### use a very specific pool
-    my_pool = "azpool_15892490026565"
+    my_pool = "azpool_15892930484971"
+
     my_batch.repurpose_existing_pool(my_pool,app, input_files, tasks)
 
     ### Use a specific pool without changing any configuration
@@ -98,7 +99,7 @@ if __name__ == '__main__':
 
     job_manager = JobManager("client_1", job_id)
 
-    total = 1000
+    total = 100
 
     for i in range(total):
         job_manager.submit_task(str(i),TASK_MODULE, TASK_INPUT)
@@ -109,6 +110,7 @@ if __name__ == '__main__':
         time.sleep(1)
 
     results = job_manager.get_results()
+    result_counts = len(results)
 
     sumtotal = 0
     for i in results:
@@ -118,10 +120,10 @@ if __name__ == '__main__':
         sumtotal += float(r[0])
 
 
-    pi = float(sumtotal/total)
+    pi = float(sumtotal/result_counts)
     print("Pi value is: {}".format(pi))
 
-    my_batch.delete_a_job(job_id)
+    #my_batch.delete_a_job(job_id)
 
 
     #job_manager.close_job()
